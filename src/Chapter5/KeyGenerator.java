@@ -1,8 +1,10 @@
 package Chapter5;
 
 public class KeyGenerator {
+    private long initKey; //密钥
+    private long key; //当前轮密钥
+    private int turn; //当前轮数
 
-    private long key;
     private  static int[] C0 = {57, 49, 41, 33, 25, 17, 9,
                                 1, 58, 50, 42, 34, 26, 18,
                                 10, 2, 59, 51, 43, 35, 27,
@@ -21,18 +23,37 @@ public class KeyGenerator {
                                 46, 42, 50, 36, 29, 32};
     private static int[] MOVE = {1, 1, 2, 2, 2, 2, 2, 2,
                                  1, 2, 2 ,2, 2, 2, 2, 1};
-    private static int TURN = 0;
-    private static int BYTE = 4;
+
 
     KeyGenerator(String keyString){
-        this.key = Tools.stringToLong(keyString);
-        permutationChoice1();
+        this.initKey = Tools.stringToLong(keyString);
+        init();
     }
 
+    //每次调用将获取到下一个轮密钥
     public long getKey(){
         rotateLeft();
-        TURN = ++TURN;
+        this.turn += 1;
         return permutationChoice2();
+    }
+
+    //获取全部轮密钥的集合
+    public long[] getKeyList(){
+        init();
+
+        long[] keyList = new long[16];
+        for(int i=0; i<16; i++) {
+            keyList[i] = getKey();
+        }
+
+        return keyList;
+    }
+
+    //初始化
+    public void init() {
+        this.key = this.initKey;
+        this.turn = 0;
+        permutationChoice1();
     }
 
 
@@ -58,9 +79,9 @@ public class KeyGenerator {
         int maxTurn = 16;
         long C = this.key>>len;
         long D = this.key&0xFFFFFFF;
-        C = (C<<MOVE[TURN%maxTurn]) | C>>(len-MOVE[TURN%maxTurn]);
+        C = (C<<MOVE[this.turn%maxTurn]) | C>>(len-MOVE[this.turn%maxTurn]);
         C = C & 0xFFFFFFF;
-        D = (D<<MOVE[TURN%maxTurn]) | D>>(len-MOVE[TURN%maxTurn]);
+        D = (D<<MOVE[this.turn%maxTurn]) | D>>(len-MOVE[this.turn%maxTurn]);
         D = D & 0xFFFFFFF;
         this.key = (C<<len) | D;
     }

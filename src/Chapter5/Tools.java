@@ -30,13 +30,15 @@ public class Tools {
     //将密钥由数值类型转换为十六进制字符串
     protected static String longToString(long key){
         StringBuilder sb = new StringBuilder();
-        int count = 0;
+ //       int count = 0;
+        //计数
+//        for(int i=15; i>=0; i--) {
+//            long num = key>>(i*4) & 0xF;
+//            if(num != 0) break;
+//            count++;
+//        }
+        //
         for(int i=15; i>=0; i--) {
-            long num = key>>(i*4) & 0xF;
-            if(num != 0) break;
-            count++;
-        }
-        for(int i=15-count; i>=0; i--) {
             long num = key>>(i*4) & 0xF;
             sb.append(Integer.toHexString((int)num));
         }

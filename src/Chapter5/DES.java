@@ -1,10 +1,10 @@
 package Chapter5;
-import java.security.Key;
 
-import static java.lang.Math.pow;
 public class DES {
-    private long text;
-    private KeyGenerator keyGenerator;
+    private long textBit; //二进制形式的密文
+    private KeyGenerator keyGenerator; //轮密钥生成器
+
+    //初始置换矩阵
     private static int[] IP = {58, 50, 42, 34, 26, 18, 10, 2,
                                 60, 52, 44, 36, 28, 20, 12, 4,
                                 62, 54, 46, 38, 30, 22, 14, 6,
@@ -13,6 +13,8 @@ public class DES {
                                 59, 51,43, 35, 27, 19, 11, 3,
                                 61, 53, 45, 37, 29, 21, 13, 5,
                                 63, 55, 47, 39, 31, 23, 15, 7};
+
+    //逆初始置换矩阵
     private static int[] NIP = {40, 8, 48, 16, 56, 24, 64, 32,
                                 39, 7, 47, 15, 55, 23, 63, 31,
                                 38, 6, 46, 14, 54, 22, 62, 30,
@@ -21,6 +23,8 @@ public class DES {
                                 35, 3, 43, 11, 51, 19, 59, 27,
                                 34, 2, 42, 10, 50, 18, 58, 26,
                                 33, 1, 41, 9, 49, 17, 57, 25};
+
+    //扩展型P盒，用于扩展变换E
     private static int[] E = {32, 1, 2, 3, 4, 5,
                                 4, 5, 6, 7, 8, 9,
                                 8, 9, 10, 11, 12, 13,
@@ -29,6 +33,8 @@ public class DES {
                                 20, 21, 22, 23, 24, 25,
                                 24, 25, 26, 27, 28, 29,
                                 28, 29, 30, 31, 32, 1};
+
+    //用于置换运算P
     private static int[] P = {16, 7, 20, 21,
                                 29, 12, 28, 17,
                                 1, 15, 23, 26,
@@ -37,6 +43,8 @@ public class DES {
                                 32, 27, 3, 9,
                                 19, 13, 30, 6,
                                 22, 11, 4, 25};
+
+    //S盒，用于选择压缩变换P
     private static int[][][] S = {
                                 //S1
                                 {{14, 4, 13, 1, 2, 15, 11, 8, 3, 10, 6, 12, 5, 9, 0, 7},
@@ -87,58 +95,63 @@ public class DES {
                                 {2, 1, 14, 7, 4, 10, 8, 13, 15, 12, 9, 0, 3, 5, 6, 11}}
     };
 
-    /*
-     * @args s 64位密文
-     */
-    public DES(String text, String key){
-        keyGenerator = new KeyGenerator(key);
-        this.text = Tools.stringToLong(text);
-        encrypt();
-    }
 
-    private void encrypt() {
+    /*
+     * @param textBit 64位明文
+     * @param initKey 密钥
+     * @return 密文
+     */
+    public long encrypt(long textBit, String initKey) {
+
+        //利用密钥创建轮密钥生成器， 将十六进制文本以二进制形式存储在long类型的变量textBit中
+        this.keyGenerator = new KeyGenerator(initKey);
+        this.textBit = textBit;
+
+        //初始置换
         initialPermutation();
-        int totalTurn = 16;
+
+        int totalTurn = 16; //16轮
         int len = 32; //L与R的长度
-        System.out.println("turn:" + 0 + "   Li+Ri:" + Tools.longToString(text));
         for(int i=0; i<totalTurn; i++) {
-            long l = text >>> len;
-            long temp = text << len;
+            long l = textBit >>> len;
+            long temp = textBit << len;
             long r = temp >>> len;
             long key = keyGenerator.getKey();
             if(i != totalTurn-1) {
-                text = temp | (l ^ F(r, key));
+                textBit = temp | (l ^ F(r, key));
             } else {
-                text = ((l ^ F(r, key)))<<len |r;
+                textBit = ((l ^ F(r, key)))<<len |r;
             }
-            System.out.println("Turn:" + (i+1) + "   Li+Ri:" + Tools.longToString(text)
-                    +"    Key:"+Tools.longToString(key));
         }
+
+        //逆初始置换
         inverseInitialPermutation();
+
+        return textBit;
     }
 
     //初始置换
     private void initialPermutation() {
         int len_input = 64;
         int len_output = 64;
-        long newtext = 0;
+        long newtextBit = 0;
         for(int i=0; i<len_output; i++) {
-            long num = (this.text>>>(len_input-IP[i]))&1;
-            newtext = newtext * 2 + num;
+            long num = (this.textBit>>>(len_input-IP[i]))&1;
+            newtextBit = newtextBit * 2 + num;
         }
-        this.text = newtext;
+        this.textBit = newtextBit;
     }
 
     //逆初始置换
     private void inverseInitialPermutation() {
         int len_input = 64;
         int len_output = 64;
-        long newtext = 0;
+        long newtextBit = 0;
         for(int i=0; i<len_output; i++) {
-            long num = (this.text>>>(len_input-NIP[i]))&1;
-            newtext = newtext * 2 + num;
+            long num = (this.textBit>>>(len_input-NIP[i]))&1;
+            newtextBit = newtextBit * 2 + num;
         }
-        this.text = newtext;
+        this.textBit = newtextBit;
     }
 
     //F变换
@@ -156,7 +169,7 @@ public class DES {
         int len_output = 48;
         long newR = 0;
         for(int i=0; i<len_output; i++) {
-            long num = (this.text>>>(len_input-E[i]))&1;
+            long num = (this.textBit>>>(len_input-E[i]))&1;
             newR = newR * 2 + num;
         }
         return newR;
@@ -189,10 +202,6 @@ public class DES {
             newR = newR * 2 + num;
         }
         return newR;
-    }
-
-    public String getText() {
-        return Tools.longToString(this.text);
     }
 
 }

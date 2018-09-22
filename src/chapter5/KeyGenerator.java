@@ -1,4 +1,4 @@
-package Chapter5;
+package chapter5;
 
 public class KeyGenerator {
     private long initKey; //密钥
@@ -53,7 +53,9 @@ public class KeyGenerator {
     public void init() {
         this.key = this.initKey;
         this.turn = 0;
+        Tools.printBinary(key, 64);
         permutationChoice1();
+        Tools.printBinary(key, 64);
     }
 
 
@@ -75,6 +77,8 @@ public class KeyGenerator {
 
     //循环左移
     private void rotateLeft() {
+        System.out.println("xun huan zuo yi");
+        Tools.printBinary(key, 64);
         int len = 28;
         int maxTurn = 16;
         long C = this.key>>len;
@@ -88,6 +92,8 @@ public class KeyGenerator {
 
     //置换选择2
     private long permutationChoice2() {
+        System.out.println("zhi huan xuan ze 2");
+        Tools.printBinary(key, 64);
         int len_input = 56;
         int len_output = 48;
         long newKey = 0;
@@ -95,6 +101,7 @@ public class KeyGenerator {
             long num = (this.key>>(len_input-F[i]))&1;
             newKey = newKey * 2 + num;
         }
+        Tools.printBinary(newKey, 64);
         return newKey;
     }
 

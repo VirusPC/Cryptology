@@ -1,4 +1,4 @@
-package Chapter5;
+package chapter5;
 
 public class DES {
     private long textBit; //二进制形式的密文
@@ -109,7 +109,7 @@ public class DES {
 
         //初始置换
         initialPermutation();
-
+        //Tools.printBinary(textBit, 64);
         int totalTurn = 16; //16轮
         int len = 32; //L与R的长度
         for(int i=0; i<totalTurn; i++) {

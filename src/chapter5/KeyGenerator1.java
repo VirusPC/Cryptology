@@ -1,6 +1,4 @@
-package Chapter5;
-
-import static java.lang.Math.pow;
+package chapter5;
 
 public class KeyGenerator1 {
 
